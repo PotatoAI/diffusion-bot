@@ -5,10 +5,11 @@ import coloredlogs
 import functools
 import asyncio
 import traceback
+import subprocess
 from logging import info, error, warning
 from diffusers import StableDiffusionPipeline, ModelMixin
 from telegram import Update
-from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler
+from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, MessageHandler
 from concurrent.futures import ProcessPoolExecutor
 
 coloredlogs.install(level='INFO')
@@ -37,7 +38,7 @@ class NoCheck(ModelMixin):
         return images, [False]
 
 
-class DiffusionThing:
+class Diffuser:
     def __init__(self):
         info('Initializing pipeline')
         pipe = StableDiffusionPipeline.from_pretrained(
@@ -69,15 +70,35 @@ class DiffusionThing:
         return fname
 
 
-diffusion = DiffusionThing()
+def sh(cmd: str):
+    info(cmd)
+    subprocess.run(["bash", "-c", cmd])
+
+
+class Upscaler:
+    def __init__(self):
+        self.runtime_dir = "BSRGAN"
+        self.input_file = "input.jpg"
+        self.output_file = "output.jpg"
+
+    @run_in_executor
+    def run(self, path: str) -> str:
+        sh(f"mv -f {path} {self.runtime_dir}/{self.input_file}")
+        sh(f"cd {self.runtime_dir} && make upscale-jpg")
+        return f"{self.runtime_dir}/{self.output_file}"
+
+
+# diffuser = Diffuser()
+upscaler = Upscaler()
 
 
 async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    info(update)
     prompt = update.message.text.replace("/gen", "").strip()
     try:
         if len(prompt) > 0:
             await update.message.reply_text(f'👍 Generating "{prompt}"')
-            fname = await diffusion.run(prompt)
+            fname = await diffuser.run(prompt)
             with open(fname, 'rb') as photo:
                 await update.message.reply_photo(photo=photo, caption=prompt)
     except Exception as e:
@@ -85,6 +106,17 @@ async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE):
         traceback.print_exc()
         await update.message.reply_text(f"Exception: {e}")
     # os.remove(fname)
+
+
+async def upscale(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    info(update)
+    if len(update.message.photo) > 0:
+        info(update.message.photo)
+        file_info = await context.bot.get_file(update.message.photo[0].file_id)
+        fpath = await file_info.download()
+        info(fpath)
+        out_path = await upscaler.run(fpath)
+        info(out_path)
 
 
 help_message = """
@@ -102,6 +134,8 @@ if __name__ == '__main__':
     application = ApplicationBuilder().token(token).build()
     help_handler = CommandHandler('help', help)
     start_handler = CommandHandler('gen', generate)
+    up_handler = MessageHandler(None, upscale)
     application.add_handler(help_handler)
     application.add_handler(start_handler)
+    application.add_handler(up_handler)
     application.run_polling()
