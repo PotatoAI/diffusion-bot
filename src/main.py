@@ -65,12 +65,11 @@ diffusion = DiffusionThing()
 
 async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE):
     prompt = update.message.text.replace("/gen", "").strip()
+    # await update.message.reply_text('👍')
     try:
         fname = await diffusion.run(prompt)
         with open(fname, 'rb') as photo:
-            await context.bot.send_photo(chat_id=update.effective_chat.id,
-                                         photo=photo,
-                                         caption=prompt)
+            await update.message.reply_photo(photo=photo, caption=prompt)
     except Exception as e:
         error(e)
         await update.message.reply_text(f"Exception: {e}")
