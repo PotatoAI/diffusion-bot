@@ -1,5 +1,6 @@
 import torch
 from diffusers import StableDiffusionPipeline, ModelMixin
+import wx
 
 
 class NoCheck(ModelMixin):
@@ -23,10 +24,34 @@ class DiffusionThing:
         pipe.enable_attention_slicing()
         self.pipe = pipe.to("mps")
 
-    def run(self):
-        prompt = "a photo of an astronaut riding a horse on mars"
+    def run(self, prompt: str):
         image = self.pipe(prompt).images[0]
         image.save('output.png')
 
 
-DiffusionThing().run()
+class MyWin(wx.Frame):
+
+    def __init__(self, parent):
+        super(MyWin, self).__init__(parent,
+                                    title="Stable Diffusion",
+                                    size=(200, 150))
+        panel = wx.Panel(self)
+        vbox = wx.BoxSizer(wx.VERTICAL)
+
+        self.btn = wx.Button(panel, -1, "click Me")
+        self.btn.Bind(wx.EVT_BUTTON, self.OnClicked)
+        vbox.Add(self.btn, 0, wx.ALIGN_CENTER)
+
+        self.txt = wx.TextCtrl(self.panel, -1, size=(140, -1))
+        self.txt.SetValue('name goes here')
+        vbox.Add(self.txt, 0, wx.ALIGN_CENTER)
+
+    def OnClicked(self, event):
+        # btn = event.GetEventObject().GetLabel()
+        DiffusionThing().run(self.txt.GetValue())
+
+
+# Next, create an application object.
+app = wx.App()
+MyWin(None)
+app.MainLoop()
