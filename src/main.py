@@ -61,7 +61,6 @@ class DiffusionThing:
         info(f'Generating "{prompt}"')
         with torch.autocast(self.device):
             result = self.pipe([prompt], num_inference_steps=50)
-        info(result)
         image = result.images[0]
         id = uuid.uuid1()
         fname = f"images/{id}.png"
