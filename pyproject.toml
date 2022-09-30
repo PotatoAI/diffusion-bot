@@ -11,7 +11,9 @@ huggingface = "^0.0.1"
 transformers = "^4.22.2"
 ftfy = "^6.1.1"
 attrdict = "^2.0.1"
-wxPython = "^4.2.0"
+python-telegram-bot = {version = "^20.0a4",  allow-prereleases = true}
+uuid = "^1.30"
+coloredlogs = "^15.0.1"
 
 [tool.poetry.dev-dependencies]
 

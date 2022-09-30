@@ -1,6 +1,27 @@
 import torch
+import os
+import uuid
+import coloredlogs
+import functools
+from logging import info
 from diffusers import StableDiffusionPipeline, ModelMixin
-import wx
+from telegram import Update
+from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler
+from concurrent.futures import ProcessPoolExecutor
+
+coloredlogs.install(level='INFO')
+
+pool_executor = ProcessPoolExecutor(1)
+
+
+def run_in_executor(f):
+
+    @functools.wraps(f)
+    def inner(*args, **kwargs):
+        loop = asyncio.get_running_loop()
+        return loop.run_in_executor(pool_executor, lambda: f(*args, **kwargs))
+
+    return inner
 
 
 class NoCheck(ModelMixin):
@@ -22,42 +43,36 @@ class DiffusionThing:
             "CompVis/stable-diffusion-v1-4", use_auth_token=True)
         pipe.safety_checker = NoCheck()
         pipe.enable_attention_slicing()
-        self.pipe = pipe.to("mps")
+        # self.pipe = pipe.to("mps")
+        self.pipe = pipe.to("cuda")
 
-    def run(self, prompt: str):
+    @run_in_executor
+    def run(self, prompt: str) -> str:
+        info(f"Generating {prompt}")
         image = self.pipe(prompt).images[0]
-        image.save('output.png')
+        id = uuid.uuid1()
+        fname = f"{id}.png"
+        info(f"Saving to {fname}")
+        image.save(fname)
+        return fname
 
 
-class MyWin(wx.Frame):
-
-    def __init__(self, parent):
-        super(MyWin, self).__init__(parent,
-                                    title="Stable Diffusion",
-                                    size=(200, 150))
-        panel = wx.Panel(self)
-        vbox = wx.BoxSizer(wx.VERTICAL)
-
-        self.txt = wx.TextCtrl(panel, -1, size=(140, -1))
-        self.txt.SetValue('Landscape')
-        vbox.Add(self.txt, 0, 0, 0)
-
-        self.btn = wx.Button(panel, -1, "click Me")
-        self.btn.Bind(wx.EVT_BUTTON, self.OnClicked)
-        vbox.Add(self.btn, 0, 0, 0)
-
-        panel.SetSizer(vbox)
-
-        self.Centre()
-        self.Show()
-        self.Fit()
-
-    def OnClicked(self, event):
-        # btn = event.GetEventObject().GetLabel()
-        DiffusionThing().run(self.txt.GetValue())
+diffusion = DiffusionThing()
 
 
-# Next, create an application object.
-app = wx.App()
-MyWin(None)
-app.MainLoop()
+async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    prompt = update.message.text.replace("/gen ", "")
+    fname = await diffusion.run(prompt)
+    with open(fname, 'rb') as photo:
+        await context.bot.send_photo(chat_id=update.effective_chat.id,
+                                     photo=photo,
+                                     caption=prompt)
+    # os.remove(fname)
+
+
+if __name__ == '__main__':
+    token = os.getenv('TG_TOKEN')
+    application = ApplicationBuilder().token(token).build()
+    start_handler = CommandHandler('gen', generate)
+    application.add_handler(start_handler)
+    application.run_polling()
