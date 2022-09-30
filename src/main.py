@@ -5,7 +5,7 @@ import coloredlogs
 import functools
 import asyncio
 import traceback
-from logging import info, error, warn
+from logging import info, error, warning
 from diffusers import StableDiffusionPipeline, ModelMixin
 from telegram import Update
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler
@@ -33,7 +33,7 @@ class NoCheck(ModelMixin):
                                 param=torch.nn.Parameter(torch.randn(3)))
 
     def forward(self, images=None, **kwargs):
-        warn('Skipping NSFW check')
+        warning('Skipping NSFW check')
         return images, [False]
 
 
