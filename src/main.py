@@ -4,6 +4,7 @@ import uuid
 import coloredlogs
 import functools
 import asyncio
+import traceback
 from logging import info, error, warn
 from diffusers import StableDiffusionPipeline, ModelMixin
 from telegram import Update
@@ -40,22 +41,28 @@ class DiffusionThing:
     def __init__(self):
         info('Initializing model')
         pipe = StableDiffusionPipeline.from_pretrained(
-            "CompVis/stable-diffusion-v1-4", use_auth_token=True)
+            "CompVis/stable-diffusion-v1-4",
+            revision="fp16",
+            torch_dtype=torch.float16,
+            use_auth_token=True)
         pipe.safety_checker = NoCheck()
-        pipe.enable_attention_slicing()
         device = 'cuda'
         if torch.backends.mps.is_available():
             device = 'mps'
         info(f'Moving model to {device}')
         self.pipe = pipe.to(device)
+        info('Enabling attention slicing for smaller VRAM usage')
+        self.pipe.enable_attention_slicing()
 
     @run_in_executor
     def run(self, prompt: str) -> str:
-        info(f"Generating {prompt}")
-        image = self.pipe(prompt).images[0]
+        info(f'Generating "{prompt}"')
+        result = self.pipe([prompt], num_inference_steps=50)
+        info(result)
+        image = result.images[0]
         id = uuid.uuid1()
         fname = f"images/{id}.png"
-        info(f"Saving to {fname}")
+        info(f'Saving to "{fname}"')
         image.save(fname)
         return fname
 
@@ -72,6 +79,7 @@ async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_photo(photo=photo, caption=prompt)
     except Exception as e:
         error(e)
+        traceback.print_exc()
         await update.message.reply_text(f"Exception: {e}")
     # os.remove(fname)
 
