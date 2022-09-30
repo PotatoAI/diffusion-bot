@@ -8,6 +8,8 @@ authors = ["Max Gonzih <gonzih@gmail.com>"]
 python = "^3.9"
 diffusers = "^0.3.0"
 huggingface = "^0.0.1"
+transformers = "^4.22.2"
+ftfy = "^6.1.1"
 
 [tool.poetry.dev-dependencies]
 
