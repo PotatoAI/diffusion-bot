@@ -48,6 +48,10 @@ class MyWin(wx.Frame):
 
         panel.SetSizer(vbox)
 
+        self.Centre()
+        self.Show()
+        self.Fit()
+
     def OnClicked(self, event):
         # btn = event.GetEventObject().GetLabel()
         DiffusionThing().run(self.txt.GetValue())
@@ -55,5 +59,5 @@ class MyWin(wx.Frame):
 
 # Next, create an application object.
 app = wx.App()
-MyWin(None).Show()
+MyWin(None)
 app.MainLoop()
