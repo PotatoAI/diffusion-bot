@@ -74,11 +74,12 @@ diffusion = DiffusionThing()
 
 async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE):
     prompt = update.message.text.replace("/gen", "").strip()
-    # await update.message.reply_text('👍')
     try:
-        fname = await diffusion.run(prompt)
-        with open(fname, 'rb') as photo:
-            await update.message.reply_photo(photo=photo, caption=prompt)
+        if len(prompt) > 0:
+            await update.message.reply_text(f'👍 Generating "{prompt}"')
+            fname = await diffusion.run(prompt)
+            with open(fname, 'rb') as photo:
+                await update.message.reply_photo(photo=photo, caption=prompt)
     except Exception as e:
         error(e)
         traceback.print_exc()
@@ -86,9 +87,21 @@ async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # os.remove(fname)
 
 
+help_message = """
+Commands:
+/gen prompt - generate image based on prompt
+"""
+
+
+async def help(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(help_message)
+
+
 if __name__ == '__main__':
     token = os.getenv('TG_TOKEN')
     application = ApplicationBuilder().token(token).build()
+    help_handler = CommandHandler('help', help)
     start_handler = CommandHandler('gen', generate)
+    application.add_handler(help_handler)
     application.add_handler(start_handler)
     application.run_polling()
