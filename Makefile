@@ -5,4 +5,4 @@ login:
 	$(POE) hugginface-cli login
 
 run:
-	$(POER) src/main.py
+	env PYTORCH_ENABLE_MPS_FALLBACK=1 $(POER) src/main.py
