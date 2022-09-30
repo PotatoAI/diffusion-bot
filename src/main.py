@@ -42,8 +42,8 @@ class MyWin(wx.Frame):
         self.btn.Bind(wx.EVT_BUTTON, self.OnClicked)
         vbox.Add(self.btn, 0, wx.ALIGN_CENTER)
 
-        self.txt = wx.TextCtrl(self.panel, -1, size=(140, -1))
-        self.txt.SetValue('name goes here')
+        self.txt = wx.TextCtrl(panel, -1, size=(140, -1))
+        self.txt.SetValue('Landscape')
         vbox.Add(self.txt, 0, wx.ALIGN_CENTER)
 
     def OnClicked(self, event):
