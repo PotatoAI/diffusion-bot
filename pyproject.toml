@@ -15,6 +15,12 @@ python-telegram-bot = {version = "^20.0a4",  allow-prereleases = true}
 uuid = "^1.30"
 coloredlogs = "^15.0.1"
 
+# all the crap for BSRGAN
+torchvision = "^0.13.1"
+opencv-python = "^4.6.0"
+matplotlib = "^3.5.3"
+tqdm = "^4.64.1"
+
 [tool.poetry.dev-dependencies]
 
 [build-system]

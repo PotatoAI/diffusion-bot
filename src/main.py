@@ -88,7 +88,7 @@ class Upscaler:
         return f"{self.runtime_dir}/{self.output_file}"
 
 
-# diffuser = Diffuser()
+diffuser = Diffuser()
 upscaler = Upscaler()
 
 
@@ -111,12 +111,14 @@ async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def upscale(update: Update, context: ContextTypes.DEFAULT_TYPE):
     info(update)
     if len(update.message.photo) > 0:
-        info(update.message.photo)
-        file_info = await context.bot.get_file(update.message.photo[0].file_id)
+        file_info = await context.bot.get_file(update.message.photo[-1].file_id
+                                               )
         fpath = await file_info.download()
-        info(fpath)
         out_path = await upscaler.run(fpath)
         info(out_path)
+        with open(out_path, 'rb') as photo:
+            await update.message.reply_photo(photo=photo,
+                                             caption="Upscaled photo")
 
 
 help_message = """
