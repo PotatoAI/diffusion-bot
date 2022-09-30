@@ -51,7 +51,7 @@ class DiffusionThing:
         info(f"Generating {prompt}")
         image = self.pipe(prompt).images[0]
         id = uuid.uuid1()
-        fname = f"{id}.png"
+        fname = f"images/{id}.png"
         info(f"Saving to {fname}")
         image.save(fname)
         return fname
