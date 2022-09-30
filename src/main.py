@@ -38,13 +38,15 @@ class MyWin(wx.Frame):
         panel = wx.Panel(self)
         vbox = wx.BoxSizer(wx.VERTICAL)
 
-        self.btn = wx.Button(panel, -1, "click Me")
-        self.btn.Bind(wx.EVT_BUTTON, self.OnClicked)
-        vbox.Add(self.btn, 0, wx.ALIGN_CENTER)
-
         self.txt = wx.TextCtrl(panel, -1, size=(140, -1))
         self.txt.SetValue('Landscape')
-        vbox.Add(self.txt, 0, wx.ALIGN_CENTER)
+        vbox.Add(self.txt, 0, 0, 0)
+
+        self.btn = wx.Button(panel, -1, "click Me")
+        self.btn.Bind(wx.EVT_BUTTON, self.OnClicked)
+        vbox.Add(self.btn, 0, 0, 0)
+
+        panel.SetSizer(vbox)
 
     def OnClicked(self, event):
         # btn = event.GetEventObject().GetLabel()
@@ -53,5 +55,5 @@ class MyWin(wx.Frame):
 
 # Next, create an application object.
 app = wx.App()
-MyWin(None)
+MyWin(None).Show()
 app.MainLoop()
