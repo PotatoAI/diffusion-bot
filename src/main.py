@@ -39,25 +39,28 @@ class NoCheck(ModelMixin):
 
 class DiffusionThing:
     def __init__(self):
-        info('Initializing model')
+        info('Initializing pipeline')
         pipe = StableDiffusionPipeline.from_pretrained(
             "CompVis/stable-diffusion-v1-4",
             revision="fp16",
             torch_dtype=torch.float16,
             use_auth_token=True)
         pipe.safety_checker = NoCheck()
-        device = 'cuda'
+
+        self.device = 'cuda'
         if torch.backends.mps.is_available():
-            device = 'mps'
-        info(f'Moving model to {device}')
-        self.pipe = pipe.to(device)
+            self.device = 'mps'
+        info(f'Moving model to {self.device}')
+        self.pipe = pipe.to(self.device)
+
         info('Enabling attention slicing for smaller VRAM usage')
         self.pipe.enable_attention_slicing()
 
     @run_in_executor
     def run(self, prompt: str) -> str:
         info(f'Generating "{prompt}"')
-        result = self.pipe([prompt], num_inference_steps=50)
+        with torch.autocast(self.device):
+            result = self.pipe([prompt], num_inference_steps=50)
         info(result)
         image = result.images[0]
         id = uuid.uuid1()
