@@ -111,8 +111,9 @@ async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def upscale(update: Update, context: ContextTypes.DEFAULT_TYPE):
     info(update)
     if len(update.message.photo) > 0:
-        file_info = await context.bot.get_file(update.message.photo[-1].file_id
-                                               )
+        await update.message.reply_text('👍 upscaling')
+        fid = update.message.photo[-1].file_id
+        file_info = await context.bot.get_file(fid)
         fpath = await file_info.download()
         out_path = await upscaler.run(fpath)
         info(out_path)
