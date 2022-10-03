@@ -129,28 +129,36 @@ python-versions = ">=3.6"
 
 [[package]]
 name = "diffusers"
-version = "0.3.0"
+version = "0.4.0.dev0"
 description = "Diffusers"
 category = "main"
 optional = false
-python-versions = ">=3.6.0"
+python-versions = ">=3.7.0"
+develop = false
 
 [package.dependencies]
 filelock = "*"
-huggingface-hub = ">=0.8.1"
+huggingface-hub = ">=0.9.1"
 importlib-metadata = "*"
 numpy = "*"
-Pillow = "*"
+Pillow = "<10.0"
 regex = "!=2019.12.17"
 requests = "*"
-torch = ">=1.4"
 
 [package.extras]
-training = ["modelcards", "tensorboard", "datasets", "accelerate"]
-test = ["transformers", "scipy", "pytest-xdist", "pytest-timeout", "pytest", "onnxruntime", "datasets"]
-quality = ["hf-doc-builder", "flake8 (>=3.8.3)", "isort (>=5.5.4)", "black (==22.3)"]
-docs = ["hf-doc-builder"]
-dev = ["modelcards", "tensorboard", "accelerate", "transformers", "scipy", "pytest-xdist", "pytest-timeout", "pytest", "onnxruntime", "datasets", "hf-doc-builder", "flake8 (>=3.8.3)", "isort (>=5.5.4)", "black (==22.3)"]
+dev = ["black (==22.8)", "isort (>=5.5.4)", "flake8 (>=3.8.3)", "hf-doc-builder (>=0.3.0)", "datasets", "onnxruntime-gpu", "pytest", "pytest-timeout", "pytest-xdist", "scipy", "torchvision", "transformers (>=4.21.0)", "accelerate (>=0.11.0)", "tensorboard", "modelcards (>=0.1.4)", "torch (>=1.4)", "jax (>=0.2.8,!=0.3.2,<=0.3.6)", "jaxlib (>=0.1.65,<=0.3.6)", "flax (>=0.4.1)"]
+docs = ["hf-doc-builder (>=0.3.0)"]
+flax = ["jax (>=0.2.8,!=0.3.2,<=0.3.6)", "jaxlib (>=0.1.65,<=0.3.6)", "flax (>=0.4.1)"]
+quality = ["black (==22.8)", "isort (>=5.5.4)", "flake8 (>=3.8.3)", "hf-doc-builder (>=0.3.0)"]
+test = ["datasets", "onnxruntime-gpu", "pytest", "pytest-timeout", "pytest-xdist", "scipy", "torchvision", "transformers (>=4.21.0)"]
+torch = ["torch (>=1.4)"]
+training = ["accelerate (>=0.11.0)", "datasets", "tensorboard", "modelcards (>=0.1.4)"]
+
+[package.source]
+type = "git"
+url = "https://github.com/huggingface/diffusers.git"
+reference = "main"
+resolved_reference = "5156acc47688dc9facd07e0d15bff63a6b10bfdb"
 
 [[package]]
 name = "filelock"
@@ -748,7 +756,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "7c5d715ddc3716a78845e5b9c8619a9d43d5f9a79b11ced33d4f678ae3368ab8"
+content-hash = "521601426d708f63ca55018a2f03624cb6c1a5c4e0d6597a740a9ca13a039ec4"
 
 [metadata.files]
 anyio = []

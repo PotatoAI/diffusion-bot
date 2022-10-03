@@ -21,7 +21,6 @@ pool_executor = ProcessPoolExecutor(1)
 
 
 def run_in_executor(f):
-
     @functools.wraps(f)
     def inner(*args, **kwargs):
         loop = asyncio.get_running_loop()
@@ -32,7 +31,6 @@ def run_in_executor(f):
 
 class NoCheck(ModelMixin):
     """Can be used in place of safety checker. Use responsibly and at your own risk."""
-
     def __init__(self):
         super().__init__()
         self.register_parameter(name='asdf',
@@ -44,9 +42,8 @@ class NoCheck(ModelMixin):
 
 
 class Diffuser:
-
     def __init__(self):
-        info('Initializing pipeline')
+        info(f'Initializing pipeline from {model_id}')
         pipe = StableDiffusionPipeline.from_pretrained(
             model_id,
             revision="fp16",
@@ -82,7 +79,6 @@ def sh(cmd: str):
 
 
 class Upscaler:
-
     def __init__(self):
         self.runtime_dir = "BSRGAN"
         self.input_file = "input.jpg"
