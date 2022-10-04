@@ -15,7 +15,7 @@ class GenerateArgs(BaseModel):
     count: int = 1
 
     def sanity_check(self):
-        assert len(self.prompt) > 0, 'Prompt cant be empty'
+        assert len(self.prompt) > 0, 'Prompt can\'t be empty'
         assert self.count > 0, 'Count has to be greater than 0'
         if self.count > 1:
             assert self.seed == None, 'Cant specify seed if count is greater than 1'
