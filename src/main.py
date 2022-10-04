@@ -8,6 +8,8 @@ import traceback
 import subprocess
 import random
 import sys
+import re
+from typing import Optional
 from logging import info, error, warning
 from diffusers import StableDiffusionPipeline, ModelMixin
 from telegram import Update
@@ -63,9 +65,10 @@ class Diffuser:
         self.pipe.enable_attention_slicing()
 
     @run_in_executor
-    def run(self, prompt: str) -> str:
+    def run(self, prompt: str, seed: Optional[int]) -> (int, str):
         info(f'Generating "{prompt}"')
-        seed = random.randint(-sys.maxsize, sys.maxsize)
+        if seed == None:
+            seed = random.randint(-sys.maxsize, sys.maxsize)
         info(f"Setting seed to {seed}")
         generator = torch.Generator(self.device).manual_seed(seed)
         with torch.autocast(self.device):
@@ -77,7 +80,7 @@ class Diffuser:
         fname = f"images/{seed}_{id}.png"
         info(f'Saving to "{fname}"')
         image.save(fname)
-        return fname
+        return (seed, fname)
 
 
 def sh(cmd: str):
@@ -105,12 +108,20 @@ upscaler = Upscaler()
 async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE):
     info(update)
     prompt = update.message.text.replace("/gen", "").strip()
+    seed = None
+    reg = re.compile('seed=(-?\d+)')
+    m = reg.match(prompt)
+    if m:
+        seed_str = m.group(1)
+        info(f'Found seed string {seed_str} in prompt')
+        seed = int(seed_str)
     try:
         if len(prompt) > 0:
             await update.message.reply_text(f'👍 Generating "{prompt}"')
-            fname = await diffuser.run(prompt)
+            (seed, fname) = await diffuser.run(prompt=prompt, seed=seed)
             with open(fname, 'rb') as photo:
-                await update.message.reply_photo(photo=photo, caption=prompt)
+                await update.message.reply_photo(
+                    photo=photo, caption=f'{prompt} seed={seed}')
     except Exception as e:
         error(e)
         traceback.print_exc()
