@@ -12,6 +12,7 @@ def gen_seed() -> int:
 class GenerateArgs(BaseModel):
     prompt: str
     seed: Optional[int]
+    seedwalk: int = 0
     count: int = 1
 
     def sanity_check(self):
@@ -23,7 +24,7 @@ class GenerateArgs(BaseModel):
 
     @classmethod
     def from_prompt(cls, prompt: str, command: str = '/gen'):
-        args_list = ['seed', 'count']
+        args_list = ['seed', 'count', 'seedwalk']
         arguments = dict()
 
         for arg in args_list:

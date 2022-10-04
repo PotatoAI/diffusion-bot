@@ -83,8 +83,12 @@ class Diffuser:
         files = []
         info(f'Generating "{args.prompt}"')
 
+        if args.seedwalk != 0:
+            info('Setting seed since seedwalk is not 0')
+            args.seed = gen_seed()
+
         for _ in range(0, args.count):
-            seed = args.seed or gen_seed()
+            seed = (args.seed or gen_seed()) + args.seedwalk
             info(f"Setting seed to {seed}")
             generator = torch.Generator(self.device).manual_seed(seed)
 
