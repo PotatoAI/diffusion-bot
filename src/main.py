@@ -138,7 +138,7 @@ async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE):
             gen_media = await diffuser.run(args)
             caption = f'{args.prompt} seed={args.seed}'
             photos = [
-                InputMediaPhoto(media=open(mediapath, 'rb'),
+                InputMediaPhoto(media=open(media.path, 'rb'),
                                 caption=media.caption) for media in gen_media
             ]
 
