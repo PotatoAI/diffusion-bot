@@ -7,6 +7,14 @@ login:
 run:
 	env PYTORCH_ENABLE_MPS_FALLBACK=1 $(POER) src/main.py
 
+.PHONY: test
+test:
+	$(POE) pytest
+
+.PHONY: mypy
+mypy:
+	$(POE) mypy
+
 PROJECT="max1"
 
 run-model:

@@ -6,15 +6,15 @@ import functools
 import asyncio
 import traceback
 import subprocess
-import random
-import sys
-import re
-from typing import Optional
+from typing import Optional, List
 from logging import info, error, warning
 from diffusers import StableDiffusionPipeline, ModelMixin
-from telegram import Update
+from telegram import Update, InputMediaPhoto
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, MessageHandler
 from concurrent.futures import ProcessPoolExecutor
+from bot.args import GenerateArgs, gen_seed
+from telegram import InputMediaPhoto
+from pydantic import BaseModel
 
 coloredlogs.install(level='INFO')
 
@@ -45,42 +45,65 @@ class NoCheck(ModelMixin):
         return images, [False]
 
 
+class GeneratedMedia(BaseModel):
+    path: str
+    caption: str
+    seed: int
+
+
 class Diffuser:
     def __init__(self):
-        info(f'Initializing pipeline from {model_id}')
-        pipe = StableDiffusionPipeline.from_pretrained(
-            model_id,
-            revision="fp16",
-            torch_dtype=torch.float16,
-            use_auth_token=True)
-        pipe.safety_checker = NoCheck()
+        self.initialized = False
 
-        self.device = 'cuda'
-        if torch.backends.mps.is_available():
-            self.device = 'mps'
-        info(f'Moving model to {self.device}')
-        self.pipe = pipe.to(self.device)
+    def init(self):
+        if not self.initialized:
+            info(f'Initializing pipeline from {model_id}')
+            pipe = StableDiffusionPipeline.from_pretrained(
+                model_id,
+                revision="fp16",
+                torch_dtype=torch.float16,
+                use_auth_token=True)
+            pipe.safety_checker = NoCheck()
 
-        info('Enabling attention slicing for smaller VRAM usage')
-        self.pipe.enable_attention_slicing()
+            self.device = 'cuda'
+            if torch.backends.mps.is_available():
+                self.device = 'mps'
+            info(f'Moving model to {self.device}')
+            self.pipe = pipe.to(self.device)
+
+            info('Enabling attention slicing for smaller VRAM usage')
+            self.pipe.enable_attention_slicing()
+
+        self.initialized = True
 
     @run_in_executor
-    def run(self, prompt: str, seed: Optional[int]) -> (int, str):
-        info(f'Generating "{prompt}"')
-        if seed == None:
-            seed = random.randint(-sys.maxsize, sys.maxsize)
-        info(f"Setting seed to {seed}")
-        generator = torch.Generator(self.device).manual_seed(seed)
-        with torch.autocast(self.device):
-            result = self.pipe([prompt],
-                               generator=generator,
-                               num_inference_steps=50)
-        image = result.images[0]
-        id = uuid.uuid1()
-        fname = f"images/{seed}_{id}.png"
-        info(f'Saving to "{fname}"')
-        image.save(fname)
-        return (seed, fname)
+    def run(self, args: GenerateArgs) -> List[GeneratedMedia]:
+        self.init()
+
+        files = []
+        info(f'Generating "{args.prompt}"')
+
+        for _ in range(0, args.count):
+            seed = args.seed or gen_seed()
+            info(f"Setting seed to {seed}")
+            generator = torch.Generator(self.device).manual_seed(seed)
+
+            with torch.autocast(self.device):
+                result = self.pipe([args.prompt],
+                                   generator=generator,
+                                   num_inference_steps=50)
+
+            image = result.images[0]
+            id = uuid.uuid1()
+            fname = f"images/{args.seed}_{id}.png"
+            info(f'Saving to "{fname}"')
+            image.save(fname)
+            files.append(
+                GeneratedMedia(path=fname,
+                               seed=seed,
+                               caption=f'{args.prompt} seed={seed}'))
+
+        return files
 
 
 def sh(cmd: str):
@@ -107,22 +130,19 @@ upscaler = Upscaler()
 
 async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE):
     info(update)
-    prompt = update.message.text.replace("/gen", "").strip()
-    seed = None
-    p = re.compile('seed=(-?\d+)')
-    m = p.search(prompt)
-    if m:
-        seed_str = m.group(1)
-        info(f'Found seed string {seed_str} in prompt')
-        seed = int(seed_str)
-    prompt = p.sub('', prompt).strip()
+    args = GenerateArgs.from_prompt(update.message.text)
     try:
-        if len(prompt) > 0:
-            await update.message.reply_text(f'👍 Generating "{prompt}"')
-            (seed, fname) = await diffuser.run(prompt=prompt, seed=seed)
-            with open(fname, 'rb') as photo:
-                await update.message.reply_photo(
-                    photo=photo, caption=f'{prompt} seed={seed}')
+        args.sanity_check()
+        if len(args.prompt) > 0:
+            await update.message.reply_text(f'👍 Generating "{args.prompt}"')
+            gen_media = await diffuser.run(args)
+            caption = f'{args.prompt} seed={args.seed}'
+            photos = [
+                InputMediaPhoto(media=open(mediapath, 'rb'),
+                                caption=media.caption) for media in gen_media
+            ]
+
+            await update.message.reply_media_group(media=photos)
     except Exception as e:
         error(e)
         traceback.print_exc()
