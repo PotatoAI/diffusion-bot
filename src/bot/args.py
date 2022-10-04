@@ -19,8 +19,8 @@ class GenerateArgs(BaseModel):
         assert len(self.prompt) > 0, 'Prompt can\'t be empty'
         assert self.count > 0, 'Count has to be greater than 0'
         assert self.count <= 10, 'Count has to be lower than 10'
-        if self.count > 1:
-            assert self.seed == None, 'Cant specify seed if count is greater than 1'
+        if self.count > 1 and self.seedwalk == 0:
+            assert self.seed == None, 'Cant specify seed with count and without seedwalk'
 
     @classmethod
     def from_prompt(cls, prompt: str, command: str = '/gen'):
