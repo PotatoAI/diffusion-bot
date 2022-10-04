@@ -84,11 +84,15 @@ class Diffuser:
         info(f'Generating "{args.prompt}"')
 
         if args.seedwalk != 0:
-            info('Setting seed since seedwalk is not 0')
             args.seed = gen_seed()
+            info(
+                f'Setting args.seed to {args.seed} since seedwalk is {args.seedwalk}'
+            )
 
-        for _ in range(0, args.count):
-            seed = (args.seed or gen_seed()) + args.seedwalk
+        for i in range(0, args.count):
+            seed = gen_seed()
+            if args.seed:
+                seed = args.seed + args.seedwalk * i
             info(f"Setting seed to {seed}")
             generator = torch.Generator(self.device).manual_seed(seed)
 
