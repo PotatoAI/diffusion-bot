@@ -24,4 +24,4 @@ BSRGAN:
 	git clone git@github.com:PotatoAI/BSRGAN.git BSRGAN
 
 sync-outputs:
-	cp -v images/*.png /mnt/work/gnzh/dreambooth/all-outputs/
+	rsync -v --size-only images/*.png /mnt/work/gnzh/dreambooth/all-outputs/
