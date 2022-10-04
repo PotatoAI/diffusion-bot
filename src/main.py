@@ -6,6 +6,8 @@ import functools
 import asyncio
 import traceback
 import subprocess
+import random
+import sys
 from logging import info, error, warning
 from diffusers import StableDiffusionPipeline, ModelMixin
 from telegram import Update
@@ -63,11 +65,16 @@ class Diffuser:
     @run_in_executor
     def run(self, prompt: str) -> str:
         info(f'Generating "{prompt}"')
+        seed = random.randint(-sys.maxsize, sys.maxsize)
+        info(f"Setting seed to {seed}")
+        generator = torch.Generator(self.device).manual_seed(seed)
         with torch.autocast(self.device):
-            result = self.pipe([prompt], num_inference_steps=50)
+            result = self.pipe([prompt],
+                               generator=generator,
+                               num_inference_steps=50)
         image = result.images[0]
         id = uuid.uuid1()
-        fname = f"images/{id}.png"
+        fname = f"images/{seed}_{id}.png"
         info(f'Saving to "{fname}"')
         image.save(fname)
         return fname

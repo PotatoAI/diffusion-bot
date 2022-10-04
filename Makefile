@@ -7,7 +7,7 @@ login:
 run:
 	env PYTORCH_ENABLE_MPS_FALLBACK=1 $(POER) src/main.py
 
-PROJECT="lubov4"
+PROJECT="max1"
 
 run-model:
 	env MODEL=/mnt/work/gnzh/dreambooth/$(PROJECT)/out PYTORCH_ENABLE_MPS_FALLBACK=1 $(POER) src/main.py
