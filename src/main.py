@@ -99,7 +99,7 @@ class Diffuser:
 
             image = result.images[0]
             id = uuid.uuid1()
-            fname = f"images/{args.seed}_{id}.png"
+            fname = f"images/{seed}_{id}.png"
             info(f'Saving to "{fname}"')
             image.save(fname)
             files.append(
