@@ -115,7 +115,7 @@ async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE):
         seed_str = m.group(1)
         info(f'Found seed string {seed_str} in prompt')
         seed = int(seed_str)
-    prompt = p.sub('', prompt)
+    prompt = p.sub('', prompt).strip()
     try:
         if len(prompt) > 0:
             await update.message.reply_text(f'👍 Generating "{prompt}"')
