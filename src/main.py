@@ -18,8 +18,9 @@ from pydantic import BaseModel
 
 coloredlogs.install(level='INFO')
 
-model_id = os.getenv('MODEL', 'CompVis/stable-diffusion-v1-4')
-info(f"Using {model_id} model")
+model_path = os.getenv('MODEL', 'CompVis/stable-diffusion-v1-4')
+model_id = os.getenv('MODEL_ID', 'unknown')
+info(f"Using {model_path} model")
 
 pool_executor = ProcessPoolExecutor(1)
 
@@ -57,9 +58,9 @@ class Diffuser:
 
     def init(self):
         if not self.initialized:
-            info(f'Initializing pipeline from {model_id}')
+            info(f'Initializing pipeline from {model_path}')
             pipe = StableDiffusionPipeline.from_pretrained(
-                model_id,
+                model_path,
                 revision="fp16",
                 torch_dtype=torch.float16,
                 use_auth_token=True)
