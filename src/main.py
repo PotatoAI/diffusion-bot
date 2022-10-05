@@ -101,15 +101,15 @@ class Diffuser:
                                    generator=generator,
                                    num_inference_steps=50)
 
-            image = result.images[0]
-            id = uuid.uuid1()
-            fname = f"images/{seed}_{id}.png"
-            info(f'Saving to "{fname}"')
-            image.save(fname)
-            files.append(
-                GeneratedMedia(path=fname,
-                               seed=seed,
-                               caption=f'{args.prompt} seed={seed}'))
+            for image in result.images:
+                id = uuid.uuid1()
+                fname = f"images/{seed}_{id}.png"
+                info(f'Saving to "{fname}"')
+                image.save(fname)
+                files.append(
+                    GeneratedMedia(path=fname,
+                                   seed=seed,
+                                   caption=f'{args.prompt} seed={seed}'))
 
         return files
 
