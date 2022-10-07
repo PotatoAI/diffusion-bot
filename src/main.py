@@ -42,7 +42,7 @@ class NoCheck(ModelMixin):
                                 param=torch.nn.Parameter(torch.randn(3)))
 
     def forward(self, images=None, **kwargs):
-        warning('Skipping NSFW check')
+        debug('Skipping NSFW check')
         return images, [False]
 
 
