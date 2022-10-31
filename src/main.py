@@ -100,6 +100,8 @@ class Diffuser:
             with torch.autocast(self.device):
                 result = self.pipe([args.prompt],
                                    generator=generator,
+                                   width=512,
+                                   height=768,
                                    num_inference_steps=50)
 
             for image in result.images:
