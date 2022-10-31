@@ -7,7 +7,7 @@ import asyncio
 import traceback
 import subprocess
 from typing import Optional, List
-from logging import info, error, warning
+from logging import info, error, warning, debug
 from diffusers import StableDiffusionPipeline, ModelMixin
 from telegram import Update, InputMediaPhoto
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, MessageHandler
