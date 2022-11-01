@@ -105,7 +105,7 @@ class Diffuser:
                                    generator=generator,
                                    width=512,
                                    height=768,
-                                   num_inference_steps=100)
+                                   num_inference_steps=args.steps)
 
             for image in result.images:
                 id = uuid.uuid1()
