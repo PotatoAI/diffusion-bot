@@ -15,7 +15,7 @@ test:
 mypy:
 	$(POE) mypy
 
-PROJECT="max4"
+PROJECT="max6"
 
 run-model:
 	env MODEL_ID=$(PROJECT) MODEL=/mnt/work/gnzh/dreambooth/$(PROJECT)/out PYTORCH_ENABLE_MPS_FALLBACK=1 $(POER) src/main.py
