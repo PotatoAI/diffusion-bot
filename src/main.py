@@ -8,7 +8,7 @@ import traceback
 import subprocess
 from typing import Optional, List
 from logging import info, error, warning, debug
-from diffusers import StableDiffusionPipeline, ModelMixin
+from diffusers import StableDiffusionPipeline
 from telegram import Update, InputMediaPhoto
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, MessageHandler
 from concurrent.futures import ProcessPoolExecutor
@@ -35,19 +35,6 @@ def run_in_executor(f):
     return inner
 
 
-class NoCheck(ModelMixin):
-    """Can be used in place of safety checker. Use responsibly and at your own risk."""
-
-    def __init__(self):
-        super().__init__()
-        self.register_parameter(name='asdf',
-                                param=torch.nn.Parameter(torch.randn(3)))
-
-    def forward(self, images=None, **kwargs):
-        debug('Skipping NSFW check')
-        return images, [False]
-
-
 class GeneratedMedia(BaseModel):
     path: str
     caption: str
@@ -66,8 +53,8 @@ class Diffuser:
                 model_path,
                 revision="fp16",
                 torch_dtype=torch.float16,
+                safety_checker=None,
                 use_auth_token=True)
-            pipe.safety_checker = NoCheck()
 
             self.device = 'cuda'
             if torch.backends.mps.is_available():
