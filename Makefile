@@ -25,3 +25,6 @@ BSRGAN:
 
 sync-outputs:
 	rsync -v --size-only images/*.png /mnt/work/gnzh/dreambooth/all-outputs/
+
+mount:
+	sudo mount -t drvfs "Z:" /mnt/work
