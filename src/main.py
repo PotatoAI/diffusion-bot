@@ -9,6 +9,7 @@ import subprocess
 from typing import Optional, List
 from logging import info, error, warning, debug
 from diffusers import StableDiffusionPipeline
+from diffusers.schedulers import DDIMScheduler, LMSDiscreteScheduler, PNDMScheduler
 from telegram import Update, InputMediaPhoto
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, MessageHandler
 from concurrent.futures import ProcessPoolExecutor
@@ -86,10 +87,15 @@ class Diffuser:
                 seed = args.seed + args.seedwalk * i
             info(f"Setting seed to {seed}")
             generator = torch.Generator(self.device).manual_seed(seed)
+            # DDIMScheduler, LMSDiscreteScheduler, PNDMScheduler
+            scheduler = DDIMScheduler()
+            # scheduler = LMSDiscreteScheduler()
+            # scheduler = PNDMScheduler()
 
             with torch.autocast(self.device):
                 result = self.pipe([args.prompt],
                                    generator=generator,
+                                   scheduler=scheduler,
                                    width=512,
                                    height=768,
                                    num_inference_steps=args.steps)
