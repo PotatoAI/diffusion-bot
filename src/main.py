@@ -27,6 +27,7 @@ pool_executor = ProcessPoolExecutor(1)
 
 
 def run_in_executor(f):
+
     @functools.wraps(f)
     def inner(*args, **kwargs):
         loop = asyncio.get_running_loop()
@@ -42,6 +43,7 @@ class GeneratedMedia(BaseModel):
 
 
 class Diffuser:
+
     def __init__(self):
         self.initialized = False
 
@@ -86,7 +88,7 @@ class Diffuser:
             info(f"Setting seed to {seed}")
             generator = torch.Generator(self.device).manual_seed(seed)
             # DDIMScheduler, LMSDiscreteScheduler, PNDMScheduler
-            scheduler = DDIMScheduler()
+            # scheduler = DDIMScheduler()
             # scheduler = LMSDiscreteScheduler()
             # scheduler = PNDMScheduler()
 
@@ -95,6 +97,7 @@ class Diffuser:
                     [args.prompt],
                     generator=generator,
                     # scheduler=scheduler,
+                    safety_checker=None,
                     width=512,
                     height=768,
                     num_inference_steps=args.steps)
@@ -118,6 +121,7 @@ def sh(cmd: str):
 
 
 class Upscaler:
+
     def __init__(self):
         self.runtime_dir = "BSRGAN"
         self.input_file = "input.jpg"
