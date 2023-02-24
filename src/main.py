@@ -8,7 +8,7 @@ import traceback
 import subprocess
 from typing import Optional, List
 from logging import info, error, warning, debug
-from diffusers import StableDiffusionPipeline
+from diffusers import StableDiffusionPipeline, DPMSolverMultistepScheduler
 from diffusers.schedulers import DDIMScheduler, LMSDiscreteScheduler, PNDMScheduler
 from telegram import Update, InputMediaPhoto
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, MessageHandler
@@ -56,6 +56,8 @@ class Diffuser:
                 torch_dtype=torch.float16,
                 safety_checker=None,
                 use_auth_token=True)
+            pipe.scheduler = DPMSolverMultistepScheduler.from_config(
+                pipe.scheduler.config)
 
             self.device = 'cuda'
             if torch.backends.mps.is_available():
@@ -97,9 +99,9 @@ class Diffuser:
                     [args.prompt],
                     generator=generator,
                     # scheduler=scheduler,
-                    safety_checker=None,
                     width=512,
-                    height=768,
+                    height=512,
+                    # height=768,
                     num_inference_steps=args.steps)
 
             for image in result.images:
