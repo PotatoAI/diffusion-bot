@@ -100,8 +100,8 @@ class Diffuser:
                     generator=generator,
                     # scheduler=scheduler,
                     width=512,
-                    height=512,
-                    # height=768,
+                    # height=512,
+                    height=768,
                     num_inference_steps=args.steps)
 
             for image in result.images:

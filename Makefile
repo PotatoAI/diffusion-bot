@@ -15,7 +15,7 @@ test:
 mypy:
 	$(POE) mypy
 
-PROJECT="lubov8"
+PROJECT="stable-diffusion-2-1-base"
 # MODEL=/mnt/work/gnzh/dreambooth/$(PROJECT)/out
 MODEL=stabilityai/stable-diffusion-2-1-base
 # MODEL=CompVis/stable-diffusion-v1-4
