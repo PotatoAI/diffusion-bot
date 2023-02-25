@@ -27,6 +27,7 @@ pool_executor = ProcessPoolExecutor(1)
 
 
 def run_in_executor(f):
+
     @functools.wraps(f)
     def inner(*args, **kwargs):
         loop = asyncio.get_running_loop()
@@ -42,6 +43,7 @@ class GeneratedMedia(BaseModel):
 
 
 class Diffuser:
+
     def __init__(self):
         self.initialized = False
 
@@ -121,6 +123,7 @@ def sh(cmd: str):
 
 
 class Upscaler:
+
     def __init__(self):
         self.runtime_dir = "BSRGAN"
         self.input_file = "input.jpg"
@@ -173,6 +176,15 @@ async def upscale(update: Update, context: ContextTypes.DEFAULT_TYPE):
                                              caption="Upscaled photo")
 
 
+# run upscale if image contains photo, run generate otherwise
+async def upscale_or_gen(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    info(update)
+    if len(update.message.photo) > 0:
+        await upscale(update, context)
+    else:
+        await generate(update, context)
+
+
 help_message = """
 Commands:
 /gen prompt - generate image based on prompt
@@ -188,7 +200,7 @@ if __name__ == '__main__':
     application = ApplicationBuilder().token(token).build()
     help_handler = CommandHandler('help', help)
     start_handler = CommandHandler('gen', generate)
-    up_handler = MessageHandler(None, upscale)
+    up_handler = MessageHandler(None, upscale_or_gen)
     application.add_handler(help_handler)
     application.add_handler(start_handler)
     application.add_handler(up_handler)
