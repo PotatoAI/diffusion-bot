@@ -27,7 +27,6 @@ pool_executor = ProcessPoolExecutor(1)
 
 
 def run_in_executor(f):
-
     @functools.wraps(f)
     def inner(*args, **kwargs):
         loop = asyncio.get_running_loop()
@@ -43,7 +42,6 @@ class GeneratedMedia(BaseModel):
 
 
 class Diffuser:
-
     def __init__(self):
         self.initialized = False
 
@@ -123,7 +121,6 @@ def sh(cmd: str):
 
 
 class Upscaler:
-
     def __init__(self):
         self.runtime_dir = "BSRGAN"
         self.input_file = "input.jpg"
