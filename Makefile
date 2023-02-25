@@ -15,10 +15,11 @@ test:
 mypy:
 	$(POE) mypy
 
-PROJECT="stable-diffusion-2-1-base"
+# PROJECT=CompVis/stable-diffusion-v1-4
+# PROJECT="lubov8"
 # MODEL=/mnt/work/gnzh/dreambooth/$(PROJECT)/out
-MODEL=stabilityai/stable-diffusion-2-1-base
-# MODEL=CompVis/stable-diffusion-v1-4
+PROJECT=stable-diffusion-2-1-base
+MODEL="stabilityai/stable-diffusion-2-1-base"
 
 run-model:
 	env MODEL_ID=$(PROJECT) MODEL=$(MODEL) PYTORCH_ENABLE_MPS_FALLBACK=1 $(POER) src/main.py
